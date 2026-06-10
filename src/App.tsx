@@ -2,37 +2,30 @@ import React, { useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { HardwarePreloader } from './components/HardwarePreloader';
 import { MasterSceneController } from './components/3d/MasterSceneController';
+import { FluidBackground } from './components/FluidBackground';
+import { IntroTypography } from './components/IntroTypography';
 import Lenis from 'lenis';
 
 export const App: React.FC = () => {
-  const [assetProgress, setAssetProgress] = useState(0);
+  const [assetProgress, setAssetProgress] = useState(100); // Defaults to 100 since no initial files
+  const [compileProgress, setCompileProgress] = useState(0);
+  const [hasAssets, setHasAssets] = useState(false);
   const [experienceLaunched, setExperienceLaunched] = useState(false);
-  const [hardwareWarmed, setHardwareWarmed] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const lenisRef = useRef<Lenis | null>(null);
 
-  // Asset Loader Pipeline and Fallback Buffer Ticker
+  // Asset Loader Pipeline (without simulated tickers)
   useEffect(() => {
-    THREE.DefaultLoadingManager.onStart = () => {};
+    THREE.DefaultLoadingManager.onStart = () => {
+      setHasAssets(true);
+      setAssetProgress(0);
+    };
     THREE.DefaultLoadingManager.onProgress = (_url, loaded, total) => {
       setAssetProgress((loaded / total) * 100);
     };
     THREE.DefaultLoadingManager.onLoad = () => {
       setAssetProgress(100);
     };
-
-    // Simulated asset streaming for Phase 1 procedural buffering
-    const interval = setInterval(() => {
-      setAssetProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + Math.random() * 10 + 3;
-      });
-    }, 110);
-
-    return () => clearInterval(interval);
   }, []);
 
   // Initialize Lenis smooth scrolling and clean up on unmount
@@ -80,16 +73,26 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (lenisRef.current) {
       if (experienceLaunched) {
-        lenisRef.current.start();
+        // Wait for the curtain to pass the halfway mark (0.7s) to start Lenis
+        const timer = setTimeout(() => {
+          lenisRef.current?.start();
+        }, 700);
+        return () => clearTimeout(timer);
       } else {
         lenisRef.current.stop();
       }
     }
   }, [experienceLaunched]);
 
+  // Combined progress: if assets are loading, average both; else, use compileProgress
+  const progress = hasAssets ? Math.floor((assetProgress + compileProgress) / 2) : compileProgress;
+
   return (
     <>
-      {/* Global 3D Canvas Viewport in the Background */}
+      {/* Permanent WebGL Watercolor fluid dynamics simulation canvas (zIndex: 1) */}
+      <FluidBackground scrollProgress={scrollProgress} />
+
+      {/* Global 3D Canvas Viewport (zIndex: 2) */}
       <div
         style={{
           position: 'fixed',
@@ -97,20 +100,25 @@ export const App: React.FC = () => {
           left: 0,
           width: '100vw',
           height: '100vh',
-          zIndex: 1,
+          zIndex: 2,
           pointerEvents: experienceLaunched ? 'auto' : 'none',
         }}
       >
         <MasterSceneController
           scrollProgress={scrollProgress}
-          onWarmed={() => setHardwareWarmed(true)}
+          onWarmingProgress={(p) => setCompileProgress(p)}
         />
       </div>
 
-      {/* Cinematic Loading Gate and Fluid Simulation Overlay */}
+      {/* Intro Typography Stage (Layer 2 - zIndex: 10, pointer-events: none) */}
+      <IntroTypography
+        scrollProgress={scrollProgress}
+        experienceLaunched={experienceLaunched}
+      />
+
+      {/* Hardware Preloader Curtain (Layer 1 - zIndex: 9999) */}
       <HardwarePreloader
-        progress={assetProgress}
-        hardwareWarmed={hardwareWarmed}
+        progress={progress}
         scrollProgress={scrollProgress}
         experienceLaunched={experienceLaunched}
         onLaunch={() => setExperienceLaunched(true)}
@@ -119,7 +127,7 @@ export const App: React.FC = () => {
       {/* Invisible Scroll Track Spacer */}
       <div
         style={{
-          height: '800vh',
+          height: '3500vh',
           width: '100%',
           pointerEvents: 'none',
         }}
