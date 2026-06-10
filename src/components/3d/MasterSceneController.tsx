@@ -16,6 +16,7 @@ interface MasterSceneControllerProps {
 const CameraController: React.FC<{ scrollProgress: number }> = ({ scrollProgress }) => {
   const { camera } = useThree();
   const lookTargetRef = useRef(new THREE.Vector3(0, 0, -1));
+  const currentProgressRef = useRef(0);
 
   // Initialize camera position at first spline point to avoid initial snapping
   useEffect(() => {
@@ -33,10 +34,14 @@ const CameraController: React.FC<{ scrollProgress: number }> = ({ scrollProgress
   }, [camera]);
 
   useFrame((_, delta) => {
-    // Constrain scrollProgress between 0 and 1
-    const p = THREE.MathUtils.clamp(scrollProgress, 0, 1);
+    // Target progress from Lenis scroll
+    const targetProgress = THREE.MathUtils.clamp(scrollProgress, 0, 1);
 
-    // 1. Position Interpolation (Direct binding to scroll)
+    // Smoothly interpolate currentProgress toward targetProgress using client-side cinematic inertia
+    currentProgressRef.current += (targetProgress - currentProgressRef.current) * 0.04;
+    const p = THREE.MathUtils.clamp(currentProgressRef.current, 0, 1);
+
+    // 1. Position Interpolation (Dampened progress along the spline)
     const targetPos = NARRATIVE_SPLINE_TRACK.getPointAt(p);
     camera.position.copy(targetPos);
 
