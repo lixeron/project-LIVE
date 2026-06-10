@@ -216,13 +216,6 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
         float sageVal = smoothstep(0.04, 0.62, sageDensity);
         float purpleVal = smoothstep(0.04, 0.62, purpleDensity);
 
-        // Screen-space vignette mask to fade colors gracefully to editorial Tan before touching screen borders (relaxed to 3%)
-        float distToEdge = min(min(v_uv.x, 1.0 - v_uv.x), min(v_uv.y, 1.0 - v_uv.y));
-        float vignette = smoothstep(0.0, 0.03, distToEdge);
-
-        sageVal *= vignette;
-        purpleVal *= vignette;
-
         vec3 color = tanBg;
         color = mix(color, sageGreen, sageVal);
         color = mix(color, purpleMist, purpleVal);
@@ -519,10 +512,14 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
           position: 'absolute',
           top: 0,
           left: 0,
-          width: '100%',
-          height: '100%',
+          width: '100vw',
+          height: '100vh',
+          transform: 'scale(1.12)',
+          transformOrigin: 'center center',
           zIndex: 0,
           pointerEvents: 'none',
+          opacity: mounted ? 1 : 0,
+          transition: 'opacity 2.5s cubic-bezier(0.215, 0.61, 0.355, 1)',
         }}
       />
 
@@ -530,8 +527,8 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
       <div
         style={{
           opacity: mounted ? 1.0 : 0,
-          transition: 'opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1)',
-          transitionDelay: '2.5s',
+          transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          transitionDelay: '3.5s',
           zIndex: 2,
         }}
       >
@@ -591,9 +588,9 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
                 lineHeight: 1,
                 display: 'inline-block',
                 opacity: mounted ? 1 : 0,
-                filter: mounted ? 'blur(0px)' : 'blur(10px)',
-                transform: mounted ? 'translateY(0px)' : 'translateY(20px)',
-                transition: 'opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), filter 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                filter: mounted ? 'blur(0px)' : 'blur(15px)',
+                transform: mounted ? 'translateX(0px)' : 'translateX(-30px)',
+                transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
                 transitionDelay: '0.5s',
               }}
             >
@@ -608,8 +605,8 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
                 letterSpacing: '0.04em',
                 marginTop: '0.4rem',
                 opacity: mounted ? 1 : 0,
-                transition: 'opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                transitionDelay: '1.2s',
+                transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                transitionDelay: '2.3s',
               }}
             >
               Life.
@@ -627,10 +624,10 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
                 lineHeight: 1,
                 display: 'inline-block',
                 opacity: mounted ? 1 : 0,
-                filter: mounted ? 'blur(0px)' : 'blur(10px)',
-                transform: mounted ? 'translateY(0px)' : 'translateY(20px)',
-                transition: 'opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), filter 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                transitionDelay: '0.65s',
+                filter: mounted ? 'blur(0px)' : 'blur(15px)',
+                transform: mounted ? 'translateX(0px)' : 'translateX(-30px)',
+                transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                transitionDelay: '0.7s',
               }}
             >
               I.
@@ -644,8 +641,8 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
                 letterSpacing: '0.04em',
                 marginTop: '0.4rem',
                 opacity: mounted ? 1 : 0,
-                transition: 'opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                transitionDelay: '1.35s',
+                transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                transitionDelay: '2.3s',
               }}
             >
               Intertwined.
@@ -663,10 +660,10 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
                 lineHeight: 1,
                 display: 'inline-block',
                 opacity: mounted ? 1 : 0,
-                filter: mounted ? 'blur(0px)' : 'blur(10px)',
-                transform: mounted ? 'translateY(0px)' : 'translateY(20px)',
-                transition: 'opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), filter 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                transitionDelay: '0.8s',
+                filter: mounted ? 'blur(0px)' : 'blur(15px)',
+                transform: mounted ? 'translateX(0px)' : 'translateX(-30px)',
+                transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                transitionDelay: '0.9s',
               }}
             >
               V.
@@ -680,8 +677,8 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
                 letterSpacing: '0.04em',
                 marginTop: '0.4rem',
                 opacity: mounted ? 1 : 0,
-                transition: 'opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                transitionDelay: '1.5s',
+                transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                transitionDelay: '2.3s',
               }}
             >
               Visceral.
@@ -699,10 +696,10 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
                 lineHeight: 1,
                 display: 'inline-block',
                 opacity: mounted ? 1 : 0,
-                filter: mounted ? 'blur(0px)' : 'blur(10px)',
-                transform: mounted ? 'translateY(0px)' : 'translateY(20px)',
-                transition: 'opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), filter 1.5s cubic-bezier(0.16, 1, 0.3, 1), transform 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                transitionDelay: '0.95s',
+                filter: mounted ? 'blur(0px)' : 'blur(15px)',
+                transform: mounted ? 'translateX(0px)' : 'translateX(-30px)',
+                transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                transitionDelay: '1.1s',
               }}
             >
               E.
@@ -716,8 +713,8 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
                 letterSpacing: '0.04em',
                 marginTop: '0.4rem',
                 opacity: mounted ? 1 : 0,
-                transition: 'opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
-                transitionDelay: '1.65s',
+                transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                transitionDelay: '2.3s',
               }}
             >
               Existence.
@@ -735,8 +732,8 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
             position: 'relative',
             transform: mounted ? 'scaleX(1)' : 'scaleX(0)',
             transformOrigin: 'center',
-            transition: 'transform 1.5s cubic-bezier(0.16, 1, 0.3, 1)',
-            transitionDelay: '1.8s',
+            transition: 'transform 1.0s cubic-bezier(0.16, 1, 0.3, 1)',
+            transitionDelay: '2.8s',
           }}
         >
           <div
@@ -756,8 +753,8 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
         <div
           style={{
             opacity: mounted ? 1 : 0,
-            transition: 'opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1)',
-            transitionDelay: '2.5s',
+            transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            transitionDelay: '3.5s',
             pointerEvents: mounted ? 'auto' : 'none',
           }}
         >
@@ -800,13 +797,12 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
         </div>
       </div>
 
-      {/* D. Micro-Metadata & Technical Telemetry Footer */}
+      {/* D. Micro-Metadata Footer */}
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '1rem',
           width: '100%',
           zIndex: 2,
         }}
@@ -814,8 +810,8 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
         <div
           style={{
             opacity: mounted ? 1 : 0,
-            transition: 'opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1)',
-            transitionDelay: '2.5s',
+            transition: 'opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            transitionDelay: '3.5s',
             width: '100%',
             display: 'flex',
             flexDirection: 'column',
@@ -833,38 +829,10 @@ export const HardwarePreloader: React.FC<HardwarePreloaderProps> = ({
               opacity: devIdOpacity,
               transition: 'opacity 0.15s linear',
               textAlign: 'center',
-              marginBottom: '1rem',
             }}
           >
             ASTOYLO // Developed by Lixeron
           </div>
-        </div>
-
-        {/* Absolute Bottom WebGL platform tracker */}
-        <div
-          style={{
-            opacity: mounted ? 1 : 0,
-            transition: 'opacity 1.0s cubic-bezier(0.16, 1, 0.3, 1)',
-            transitionDelay: '2.5s',
-          }}
-        >
-          <AnimatePresence>
-            {!experienceLaunched && (
-              <div
-                style={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.58rem',
-                  letterSpacing: '0.12em',
-                  color: '#1C1C1C',
-                  textTransform: 'uppercase',
-                  textAlign: 'center',
-                  opacity: 0.35,
-                }}
-              >
-                WebGL platform envelope: WEBGL2.0 // SHADER compile warm-up // RENDER PIPELINE warm
-              </div>
-            )}
-          </AnimatePresence>
         </div>
       </div>
     </div>
