@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { NARRATIVE_SPLINE_TRACK } from './SplineTrack';
+import { NARRATIVE_SPLINE_TRACK, FRENET_FRAMES, FRENET_SEGMENTS } from './SplineTrack';
 import { SceneStratosphere } from './scenes/SceneStratosphere';
 import { SceneCanopy } from './scenes/SceneCanopy';
 import { SceneCreek } from './scenes/SceneCreek';
@@ -26,28 +26,31 @@ const CameraController: React.FC<{ scrollProgress: number }> = ({ scrollProgress
     const startLook = new THREE.Vector3().copy(startPos).addScaledVector(startTangent, 3);
     lookTargetRef.current.copy(startLook);
     camera.lookAt(startLook);
+
+    // Set stable initial UP vector from Frenet frames to prevent sudden snaps
+    const startBinormal = FRENET_FRAMES.binormals[0];
+    camera.up.copy(startBinormal);
   }, [camera]);
 
   useFrame((_, delta) => {
     // Constrain scrollProgress between 0 and 1
     const p = THREE.MathUtils.clamp(scrollProgress, 0, 1);
 
-    // 1. Position Interpolation
+    // 1. Position Interpolation (Direct binding to scroll)
     const targetPos = NARRATIVE_SPLINE_TRACK.getPointAt(p);
-    
-    // Frame-independent exponential dampening for smooth flight
-    const dampSpeed = 3.2;
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, targetPos.x, dampSpeed, delta);
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, targetPos.y, dampSpeed, delta);
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, targetPos.z, dampSpeed, delta);
+    camera.position.copy(targetPos);
 
-    // 2. Sweeping Banking/Rotation Mechanics
-    const tangent = NARRATIVE_SPLINE_TRACK.getTangentAt(p);
-    
-    // Target look-at coordinate is camera position + tangent vector (scaled for distance offset)
-    const targetLook = new THREE.Vector3()
-      .copy(camera.position)
-      .addScaledVector(tangent, 3.0);
+    // 2. Look-ahead Target with singularity/collision protection
+    const targetLook = new THREE.Vector3();
+    if (p >= 0.99) {
+      // Near endscape: derive look target via forward tangent to prevent position-equals-target singularity
+      const tangent = NARRATIVE_SPLINE_TRACK.getTangentAt(p);
+      targetLook.copy(camera.position).addScaledVector(tangent, 3.0);
+    } else {
+      // Look ahead smoothly along the path
+      const lookAheadP = Math.min(1.0, p + 0.01);
+      targetLook.copy(NARRATIVE_SPLINE_TRACK.getPointAt(lookAheadP));
+    }
 
     // Damp the look-at target vector to make rotation transitions cinematic
     const rotationDampSpeed = 4.5;
@@ -55,6 +58,20 @@ const CameraController: React.FC<{ scrollProgress: number }> = ({ scrollProgress
     lookTargetRef.current.y = THREE.MathUtils.damp(lookTargetRef.current.y, targetLook.y, rotationDampSpeed, delta);
     lookTargetRef.current.z = THREE.MathUtils.damp(lookTargetRef.current.z, targetLook.z, rotationDampSpeed, delta);
 
+    // 3. Prevent vertical camera flipping (stabilize up vector via Frenet frames interpolation)
+    const indexFloat = p * FRENET_SEGMENTS;
+    const index0 = Math.floor(indexFloat);
+    const index1 = Math.min(FRENET_SEGMENTS, index0 + 1);
+    const weight = indexFloat - index0;
+
+    const binormal0 = FRENET_FRAMES.binormals[index0];
+    const binormal1 = FRENET_FRAMES.binormals[index1];
+
+    const interpolatedBinormal = new THREE.Vector3()
+      .lerpVectors(binormal0, binormal1, weight)
+      .normalize();
+
+    camera.up.copy(interpolatedBinormal);
     camera.lookAt(lookTargetRef.current);
   });
 

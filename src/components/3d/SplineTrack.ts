@@ -24,3 +24,7 @@ export const NARRATIVE_SPLINE_TRACK = new THREE.CatmullRomCurve3(
   0.5            // Tension parameter
 );
 export type NarrativeSplineTrackType = typeof NARRATIVE_SPLINE_TRACK;
+
+// Precompute Frenet-Serret frames for orientation/roll stabilization (prevents gimbal flips)
+export const FRENET_SEGMENTS = 200;
+export const FRENET_FRAMES = NARRATIVE_SPLINE_TRACK.computeFrenetFrames(FRENET_SEGMENTS, false);
